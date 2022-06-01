@@ -18,14 +18,13 @@ def index(request):
 
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
-    posts = (
-        Post
-        .objects
-        .filter(group=group).all()
-    )[:settings.MAX_PAGE_AMOUNT]
+    post_list = group.posts.select_related('author')
+    paginator = Paginator(post_list, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
         'group': group,
-        'posts': posts,
+        'page_obj': page_obj,
     }
     return render(request, 'posts/group_list.html', context)
 
@@ -53,6 +52,7 @@ def post_detail(request, post_id):
     return render(request, 'posts/post_detail.html', context)
 
 
+@login_required
 def post_create(request):
     form = PostForm(request.POST or None)
     if not form.is_valid():
@@ -60,7 +60,7 @@ def post_create(request):
     post = form.save(commit=False)
     post.author = request.user
     post.save()
-    return redirect('posts:profile', username=post.author)
+    return redirect('posts:profile', post.author)
 
 
 @login_required
