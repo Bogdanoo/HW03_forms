@@ -1,7 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
 from django.db import models
-from django import forms
 
 User = get_user_model()
 
@@ -37,20 +35,3 @@ class Post(models.Model):
     class Meta:
         ordering = ('-pub_date',)
         verbose_name = 'post'
-
-
-class PostForm(forms.ModelForm):
-    class Meta:
-        model = Post
-        fields = ('text', 'group')
-        help_texts = {
-            'text': 'текст поста',
-            'group': 'группа поста',
-        }
-
-    def clean_text(self):
-        text = self.cleaned_data['text']
-        if text == '':
-            raise ValidationError('заполните текст поста')
-        else:
-            return text
