@@ -7,13 +7,18 @@ from .forms import PostForm
 from .models import Group, Post, User
 
 
-def index(request):
-    post_list = Post.objects.all().select_related()
-    paginator = Paginator(post_list, 10)
+def paginator(request, post_list):
+    pages = Paginator(post_list, settings.MAX_PAGE_AMOUNT)
     page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = pages.get_page(page_number)
+    return page_obj
+
+
+def index(request):
+    post_list = Post.objects.all()
+    pages = paginator(request, post_list)
     context = {
-        'page_obj': page_obj,
+        'page_obj': pages,
     }
     return render(request, 'posts/index.html', context)
 
@@ -21,13 +26,11 @@ def index(request):
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
     posts = group.posts.select_related('author')
-    paginator = Paginator(posts, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    pages = paginator(request, posts)
     context = {
         'group': group,
         'posts': posts,
-        'page_obj': page_obj,
+        'page_obj': pages,
     }
     return render(request, 'posts/group_list.html', context)
 
@@ -36,12 +39,10 @@ def profile(request, username):
     author = get_object_or_404(User, username=username)
     posts_count = author.posts.count()
     post_list = author.posts.select_related('author')
-    paginator = Paginator(post_list, settings.MAX_PAGE_AMOUNT)
-    page_number = request.GET.get('page')
-    page_object = paginator.get_page(page_number)
+    pages = paginator(request, post_list)
     context = {
         'author': author,
-        'page_obj': page_object,
+        'page_obj': pages,
         'posts_amount': posts_count,
     }
     return render(request, 'posts/profile.html', context)
