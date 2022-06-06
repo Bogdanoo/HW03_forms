@@ -8,7 +8,7 @@ from .models import Group, Post, User
 
 
 def index(request):
-    post_list = Post.objects.all().order_by('-pub_date')
+    post_list = Post.objects.all().select_related()
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -68,18 +68,19 @@ def post_create(request):
 
 @login_required
 def post_edit(request, post_id):
-    post = get_object_or_404(Post, id=post_id, author=request.user)
+    post = get_object_or_404(Post, pk=post_id)
     form = PostForm(instance=post)
-    is_edit = True
-    if request.user == post.author:
-        if request.method == 'POST':
-            form = PostForm(request.POST or None, instance=post)
-            if form.is_valid():
-                form.save()
-            return redirect('posts:post_detail', post.pk)
-        context = {
-            'form': form,
-            'post': post,
-            'is_edit': is_edit,
-        }
-        return render(request, 'posts/update_post.html', context)
+    is_edit = form.instance, 'pk'
+    if request.user != post.author:
+        return redirect('posts:post_detail', post_id)
+    if request.method == 'POST':
+        form = PostForm(request.POST or None, instance=post)
+        if form.is_valid():
+            form.save()
+        return redirect('posts:post_detail', post.pk)
+    context = {
+        'form': form,
+        'post': post,
+        'is_edit': is_edit,
+    }
+    return render(request, 'posts/update_post.html', context)
