@@ -84,4 +84,4 @@ def post_edit(request, post_id):
         'post': post,
         'is_edit': is_edit,
     }
-    return render(request, 'posts/update_post.html', context)
+    return render(request, 'posts/create_post.html', context)
