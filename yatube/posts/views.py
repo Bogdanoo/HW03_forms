@@ -15,7 +15,7 @@ def paginator(request, post_list):
 
 
 def index(request):
-    post_list = Post.objects.all()
+    post_list = Post.objects.select_related('author')
     pages = paginator(request, post_list)
     context = {
         'page_obj': pages,
@@ -38,7 +38,7 @@ def group_posts(request, slug):
 def profile(request, username):
     author = get_object_or_404(User, username=username)
     posts_count = author.posts.count()
-    post_list = author.posts.select_related('author')
+    post_list = author.posts.select_related('group')
     pages = paginator(request, post_list)
     context = {
         'author': author,
@@ -71,7 +71,6 @@ def post_create(request):
 def post_edit(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     form = PostForm(instance=post)
-    is_edit = form.instance, 'pk'
     if request.user != post.author:
         return redirect('posts:post_detail', post_id)
     if request.method == 'POST':
@@ -82,6 +81,6 @@ def post_edit(request, post_id):
     context = {
         'form': form,
         'post': post,
-        'is_edit': is_edit,
+        'is_edit': True,
     }
     return render(request, 'posts/create_post.html', context)
