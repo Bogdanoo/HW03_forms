@@ -21,17 +21,16 @@ class PostModelTest(TestCase):
             text='Тестовый пост',
         )
 
-
     def test_models_have_correct_object_names(self):
         """Проверяем, что у моделей корректно работает __str__."""
         post = PostModelTest.post
-        expected_object_name = post.text:[15]
-        self.assertEqual(expected_object_name,str(post))
+        expected_object_name = post.text[:15]
+        self.assertEqual(expected_object_name, str(post))
 
 
-class GroupeModelTest(TestCase):
+class GroupModelTest(TestCase):
     @classmethod
-    def setUpClass(cls): -> None:
+    def setUpClass(cls) -> None:
         super().setUpClass()
         cls.group = Group.objects.create(
             title='Тестовая группа',
@@ -40,6 +39,6 @@ class GroupeModelTest(TestCase):
         )
 
     def test_models_have_correct_object_names(self):
-        group = GroupeModelTest.group
+        group = GroupModelTest.group
         expected_object_name = group.title
         self.assertEqual(expected_object_name, str(group))
